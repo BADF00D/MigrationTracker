@@ -5,20 +5,21 @@ using System.Threading;
 using System.Threading.Tasks;
 using FakeItEasy;
 using FluentAssertions;
+using MigrationTracker.Exceptions;
 using NUnit.Framework;
 
 namespace MigrationTracker.Tests.MigrationTrackerSpecs
 {
     internal abstract class MigrationTrackerSpec : AsyncSpec
     {
-        protected readonly MigrationTrackerImplementation _sut;
-        protected IProvideDataVersionInfo _provideDataVersionInfo;
+        protected readonly MigrationTrackerImplementation Sut;
+        protected readonly IProvideDataVersionInfo ProvideDataVersionInfo;
 
         public MigrationTrackerSpec()
         {
-            _provideDataVersionInfo = A.Fake<IProvideDataVersionInfo>();
-            _sut = new MigrationTrackerImplementation(
-                _provideDataVersionInfo,
+            ProvideDataVersionInfo = A.Fake<IProvideDataVersionInfo>();
+            Sut = new MigrationTrackerImplementation(
+                ProvideDataVersionInfo,
                 CreateFakeMigrationSteps().ToArray());
         }
 
@@ -34,7 +35,7 @@ namespace MigrationTracker.Tests.MigrationTrackerSpecs
     }
 
     [TestFixture]
-    internal class If_Version_is_0_and_IsMigrationRequired__is_called_with_TargetVersion_0 : MigrationTrackerSpec
+    internal class If_Version_is_0_and_IsMigrationRequired__is_called_with_ProgramVersion_0 : MigrationTrackerSpec
     {
         private bool _isRequired;
 
@@ -45,14 +46,14 @@ namespace MigrationTracker.Tests.MigrationTrackerSpecs
 
         protected override Task EstablishContext()
         {
-            A.CallTo(() => _provideDataVersionInfo.Read(A<CancellationToken>._))
+            A.CallTo(() => ProvideDataVersionInfo.Read(A<CancellationToken>._))
                 .Returns(new VersionInfo(0, DateTimeOffset.Now));
             return base.EstablishContext();
         }
 
         protected override async Task BecauseOf()
         {
-            _isRequired = await _sut.IsMigrationRequired(new VersionInfo(0, DateTimeOffset.Now));
+            _isRequired = await Sut.IsMigrationRequired(new VersionInfo(0, DateTimeOffset.Now));
         }
 
         [Test]
@@ -63,7 +64,7 @@ namespace MigrationTracker.Tests.MigrationTrackerSpecs
     }
 
     [TestFixture]
-    internal class If_Version_is_1_and_IsMigrationRequired_is_called_with_TargetVersion_3 : MigrationTrackerSpec
+    internal class If_Version_is_1_and_IsMigrationRequired_is_called_with_ProgramVersion_3 : MigrationTrackerSpec
     {
         private bool _isRequired;
 
@@ -74,20 +75,56 @@ namespace MigrationTracker.Tests.MigrationTrackerSpecs
 
         protected override Task EstablishContext()
         {
-            A.CallTo(() => _provideDataVersionInfo.Read(A<CancellationToken>._))
+            A.CallTo(() => ProvideDataVersionInfo.Read(A<CancellationToken>._))
                 .Returns(new VersionInfo(0, DateTimeOffset.Now));
             return base.EstablishContext();
         }
 
         protected override async Task BecauseOf()
         {
-            _isRequired = await _sut.IsMigrationRequired(new VersionInfo(3, DateTimeOffset.Now));
+            _isRequired = await Sut.IsMigrationRequired(new VersionInfo(3, DateTimeOffset.Now));
         }
 
         [Test]
         public void Then_result_should_be_True()
         {
             _isRequired.Should().BeTrue();
+        }
+    }
+
+    [TestFixture]
+    internal class If_Version_is_1_and_IsMigrationRequired_is_called_with_ProgramVersion_0 : MigrationTrackerSpec
+    {
+        private Exception _catchedException;
+
+        protected override IEnumerable<IMigrationStep> CreateFakeMigrationSteps()
+        {
+            return Enumerable.Empty<IMigrationStep>();
+        }
+
+        protected override Task EstablishContext()
+        {
+            A.CallTo(() => ProvideDataVersionInfo.Read(A<CancellationToken>._))
+                .Returns(new VersionInfo(1, DateTimeOffset.Now));
+            return base.EstablishContext();
+        }
+
+        protected override async Task BecauseOf()
+        {
+            try//todo there should be a better way the catching and storing the exception.
+            {
+                await Sut.IsMigrationRequired(new VersionInfo(0, DateTimeOffset.Now));
+            }
+            catch (Exception e)
+            {
+                _catchedException = e;
+            }
+        }
+
+        [Test]
+        public void Then_result_should_be_True()
+        {
+            _catchedException.Should().BeAssignableTo<MigrationException>();
         }
     }
 }

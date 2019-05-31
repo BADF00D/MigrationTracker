@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Data.Common;
 
 namespace MigrationTracker
 {
@@ -18,6 +19,15 @@ namespace MigrationTracker
         {
             Version = version;
             CreatedAt = createdAt;
+        }
+
+        public static bool operator <(VersionInfo left, VersionInfo right)
+        {
+            return left.Version < right.Version;
+        }
+        public static bool operator > (VersionInfo left, VersionInfo right)
+        {
+            return right.Version < left.Version;
         }
 
         public int CompareTo(VersionInfo other)

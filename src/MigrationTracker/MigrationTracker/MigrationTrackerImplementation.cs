@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using MigrationTracker.Exceptions;
 
 namespace MigrationTracker
 {
@@ -15,9 +16,12 @@ namespace MigrationTracker
             _migrationSteps = migrationSteps;
         }
 
-        public Task<bool> IsMigrationRequired(VersionInfo programVersion, CancellationToken cancel = default)
+        public async Task<bool> IsMigrationRequired(VersionInfo programVersion, CancellationToken cancel = default)
         {
-            throw new NotImplementedException();
+            var currentVersion = await _versionInfoProvider.Read(cancel);
+            if(currentVersion > programVersion) throw new MigrationException("Your data is newer then your program.");
+
+            return currentVersion < programVersion;
         }
 
         public Task<bool> CanMigrateTo(VersionInfo versionInfo, CancellationToken cancel = default)
