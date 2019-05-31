@@ -24,11 +24,6 @@ namespace MigrationTracker
             return currentVersion < programVersion;
         }
 
-        public Task<bool> CanMigrateTo(VersionInfo versionInfo, CancellationToken cancel = default)
-        {
-            throw new NotImplementedException();
-        }
-
         public Task MigrateTo(VersionInfo targetVersion, CancellationToken cancel = default)
         {
             throw new NotImplementedException();

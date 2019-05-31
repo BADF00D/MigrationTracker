@@ -127,4 +127,13 @@ namespace MigrationTracker.Tests.MigrationTrackerSpecs
             _catchedException.Should().BeAssignableTo<MigrationException>();
         }
     }
+
+    //[TestFixture]
+    //internal class If_can_Migrate_is_called_but_there_are_no_migration_steps_to_perform : MigrationTrackerSpec
+    //{
+    //    protected override IEnumerable<IMigrationStep> CreateFakeMigrationSteps()
+    //    {
+    //        return Enumerable.Empty<IMigrationStep>();
+    //    }
+    //}
 }
