@@ -13,9 +13,9 @@ namespace MigrationTracker
             throw new NotImplementedException();
         }
 
-        public static IProvideDataVersionInfo CreateDataVersionProvider(Func<CancellationToken,Task<VersionInfo>> read, Func<VersionInfo, CancellationToken, Task> update)
+        public static IProvideDataVersionInfo CreateDataVersionProvider(Func<CancellationToken,Task<VersionInfo>> read, Func<VersionInfo, CancellationToken, Task> save)
         {
-            throw new NotImplementedException();
+            return new GenericProvideDataVersionInfo(read, save);
         }
     }
 }
