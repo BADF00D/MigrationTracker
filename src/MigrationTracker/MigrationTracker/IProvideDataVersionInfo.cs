@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Threading;
+using System.Threading.Tasks;
 
 namespace MigrationTracker
 {
@@ -7,7 +8,7 @@ namespace MigrationTracker
     /// </summary>
     public interface IProvideDataVersionInfo
     {
-        Task<VersionInfo> Read();
-        Task Save(VersionInfo versionInfo);
+        Task<VersionInfo> Read(CancellationToken cancel = default);
+        Task Save(VersionInfo versionInfo, CancellationToken cancel = default);
     }
 }
