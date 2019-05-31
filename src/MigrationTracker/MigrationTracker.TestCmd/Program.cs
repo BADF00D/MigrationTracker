@@ -16,7 +16,7 @@ namespace MigrationTracker.TestCmd {
                 cancel => Task.FromResult(CurrentVersion),
                 (c, vi) => Task.FromResult(0) //fake write call
             );
-            var tracker = Factory.Create(versionProvider);
+            var tracker = Factory.CreateMigrationTracker(versionProvider);
 
             if (await tracker.IsMigrationRequired(CurrentVersion))
             {

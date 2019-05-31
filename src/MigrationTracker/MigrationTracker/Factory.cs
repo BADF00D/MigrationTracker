@@ -6,11 +6,13 @@ namespace MigrationTracker
 {
     public static class Factory
     {
-        public static IMigrationTracker Create(
+        public static IMigrationTracker CreateMigrationTracker(
             IProvideDataVersionInfo versionInfoProvider,
-            params IMigrationStep[] migrationSteps)
+            IMigrationStep[] migrationSteps)
         {
-            throw new NotImplementedException();
+            if (versionInfoProvider == null) throw new ArgumentNullException(nameof(versionInfoProvider));
+            if (migrationSteps == null) throw new ArgumentNullException(nameof(migrationSteps));
+            return new MigrationTrackerImplementation(versionInfoProvider, migrationSteps);
         }
 
         public static IProvideDataVersionInfo CreateDataVersionProvider(Func<CancellationToken,Task<VersionInfo>> read, Func<VersionInfo, CancellationToken, Task> save)
